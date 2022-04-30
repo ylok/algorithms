@@ -38,13 +38,17 @@ def toptradingcycle(m):
       # Part 4: Bookkeeping
       update=[]
       for comp in SCC:
-         if len(comp)==1:
+         if len(comp)==1 and m[comp[0]-1][highestRemaining[comp[0]-1]]!=comp[0]:
             continue
-         for a in comp:
-            trades+=[[a,m[a-1][highestRemaining[a-1]]]]
-            finalgifts[a-1]=m[a-1][highestRemaining[a-1]]
-            foundTCC[a-1]=1
-            update+=[a]
+         elif len(comp)==1:
+            foundTCC[comp[0]-1]=1
+            update+=[comp[0]]
+         else:
+            for a in comp:
+               trades+=[[a,m[a-1][highestRemaining[a-1]]]]
+               finalgifts[a-1]=m[a-1][highestRemaining[a-1]]
+               foundTCC[a-1]=1
+               update+=[a]
       for a in update:
          for j in range(nVert):
             m[j][m[j].index(a)]=-1
