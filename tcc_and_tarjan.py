@@ -1,18 +1,29 @@
-# preferences start at 1 not 0, but array indices start at 0
+# Written in Python 2.7.13
+# Last updated by Ylok on 4/30/22
+# For more information, see wiki page on ylok/algorithms
+
+# Top trading cycles algorithm
 # https://en.wikipedia.org/wiki/Top_trading_cycle
+trades=[]
+finalgifts=[]
 def toptradingcycle(m):
+   # Initializations
    global nVert
    global edges
    global foundTCC
+   global trades
+   global finalgifts
    nVert=len(m)
    foundTCC=[0 for i in range(nVert)]
    highestRemaining=[0 for i in range(nVert)]
    trades=[]
    finalgifts=[i+1 for i in range(nVert)]
+   # Algorithm
    for i in range(nVert):
+      # Part 1: Already found
       if foundTCC[i]:
          continue
-      # Identify edges for next step in the top trading cycle algorithm
+      # Part 2: Identify edges
       edges=[]
       for j in range(nVert):
          if foundTCC[j]:
@@ -22,10 +33,9 @@ def toptradingcycle(m):
                highestRemaining[j]=k
                break
          edges+=[[j+1,m[j][highestRemaining[j]]]]
-      # identify SCCs from those above units
+      # Part 3: Tarjan's SCC algorithm
       TarjanSCC()
-      # for each SCC (special case for SCC of size 1), add those
-      # to the trades and remove them from future passes of the algorithm
+      # Part 4: Bookkeeping
       update=[]
       for comp in SCC:
          if len(comp)==1:
@@ -38,27 +48,10 @@ def toptradingcycle(m):
       for a in update:
          for j in range(nVert):
             m[j][m[j].index(a)]=-1
-   return trades,finalgifts
+   return
 
-# and m[comp[0]-1][highestRemaining[comp[0]-1]]!=comp[0]:
-m=[[2,4,3,1],
-[1,2,3,4],
-[1,3,2,4],
-[1,2,3,4]]
-toptradingcycle(m)
-
-m=[[4, 2, 1, 7, 3, 6, 5, 8],
-[7, 2, 5, 3, 6, 1, 8, 4],
-[6, 7, 1, 3, 5, 2, 8, 4],
-[6, 2, 7, 4, 1, 3, 8, 5],
-[1, 8, 2, 7, 4, 5, 6, 3],
-[8, 7, 6, 1, 3, 4, 2, 5],
-[2, 7, 3, 8, 4, 6, 5, 1],
-[1, 8, 4, 7, 2, 3, 5, 6]]
-toptradingcycle(m)
-
-
-
+# Tarjan's stongly connected components (SCC) algorithm
+# https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm
 foundTCC=[]
 nVert=0
 edges=[]
@@ -68,9 +61,8 @@ lowlink=[]
 onStack=[]
 stack=[]
 SCC=[]
-# Tarjan's SCC algorithm
-# https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm
 def TarjanSCC():
+   # Initializations
    global soNum
    global soCounter
    global lowlink
@@ -87,6 +79,7 @@ def TarjanSCC():
    onStack=[0 for i in range(nVert+1)]
    stack=[]
    SCC=[]
+   # Algorithm 
    for v in range(1,nVert+1):
       if soNum[v]==-1:
          strongconnect(v)
@@ -105,30 +98,22 @@ def strongconnect(v):
    soCounter+=1
    onStack[v]=1
    stack+=[v]
+   # Algorithm 
    for e in edges:
-      # must be an edge from current vertex
+      # Part 1: Valid edge
       if e[0]!=v: 
          continue
-      # if vertex hasn't been explored, recurse
-      # set lowlink to the lowest search order found by either vertex
+      # Part 2: Unvisited vertex
       if soNum[e[1]]==-1: 
          strongconnect(e[1])
          lowlink[v]=min(lowlink[v],lowlink[e[1]])
-      # if already has been visited, sets lowlink to the lowest
-      # search order number
-      elif onStack[e[1]]: #
+      # Part 3: Already visited, still on stack
+      elif onStack[e[1]]:
          lowlink[v]=min(lowlink[v],soNum[e[1]])
-      # if it has a search order number and its not on the stack, 
-      # that means its already in SCC therefore ignore
+      # Part 4: Already visited, no longer on stack
       else:
          pass
-   # At this point, algorithm has visited all vertices
-   # that are reachable by vertex v. This is a SCC if this
-   # vertex v is the "lowest" vertex in the SCC. If it isn't
-   # then another vertex visited earlier is also a part of the
-   # SCC. Do nothing until we reach that vertex
-   # Once we reach that vertex, all later vertices on the
-   # stack equal the SCC
+   # Conclusion (Part 5)
    if soNum[v]==lowlink[v]:
       comp=stack[stack.index(v):]
       stack=stack[:stack.index(v)]
@@ -136,22 +121,3 @@ def strongconnect(v):
          onStack[a]=0
       SCC+=[comp]
    return
-
-nVert=17
-edges=[[10,9],[9,8],[8,10],[8,1],[1,2],[2,3],[3,4],[4,1],
-[1,11],[11,12],[12,13],[13,12],[1,5],[5,6],[6,7],[7,1],
-[6,14],[14,15],[15,16],[15,17],[16,17],[17,14]]
-TarjanSCC()
-
-Test Cases:
-nVert=4
-edges=[[1,2],[2,3],[3,4],[4,2]]
-nVert=4
-edges=[[1,2],[2,3],[3,4],[3,2],[2,4]]
-nVert=17
-edges=[[10,9],[9,8],[8,10],[8,1],[1,2],[2,3],[3,4],[4,1],
-[1,11],[11,12],[12,13],[13,12],[1,5],[5,6],[6,7],[7,1],
-[6,14],[14,15],[15,16],[15,17],[16,17],[17,14]]
-* add [12,10] to above
-
-
