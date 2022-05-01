@@ -8,9 +8,6 @@ trades=[]
 finalgifts=[]
 def toptradingcycle(m):
    # Initializations
-   global nVert
-   global edges
-   global foundTCC
    global trades
    global finalgifts
    nVert=len(m)
@@ -34,7 +31,7 @@ def toptradingcycle(m):
                break
          edges+=[[j+1,m[j][highestRemaining[j]]]]
       # Part 3: Tarjan's SCC algorithm
-      TarjanSCC()
+      TarjanSCC(nVert,edges,foundTCC)
       # Part 4: Bookkeeping
       update=[]
       for comp in SCC:
@@ -56,7 +53,6 @@ def toptradingcycle(m):
 
 # Tarjan's stongly connected components (SCC) algorithm
 # https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm
-foundTCC=[]
 nVert=0
 edges=[]
 soNum=[]
@@ -65,18 +61,21 @@ lowlink=[]
 onStack=[]
 stack=[]
 SCC=[]
-def TarjanSCC():
+def TarjanSCC(nv,ed,excl=[]):
    # Initializations
+   global nVert
+   global edges
    global soNum
    global soCounter
    global lowlink
    global onStack
    global stack
    global SCC
-   global foundTCC
+   nVert=nv
+   edges=ed
    soNum  =[-1 for i in range(nVert+1)] 
-   for i in range(len(foundTCC)):
-      if foundTCC[i]:
+   for i in range(len(excl)):
+      if excl[i]:
          soNum[i+1]=nVert+1
    soCounter=1
    lowlink=[nVert for i in range(nVert+1)]
